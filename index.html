@@ -650,6 +650,10 @@
             <input type="text" id="channel-name" placeholder="לדוגמה: חדשות 12" value="">
             <label>שם התחקירנ/ית:</label>
             <input type="text" id="producer-name" placeholder="לדוגמה: נועה כהן" value="">
+            <label>שם התוכנית:</label>
+            <input type="text" id="show-name" placeholder="לדוגמה: חדשות הבוקר" value="">
+            <label>שם המגיש/ה:</label>
+            <input type="text" id="host-name" placeholder="לדוגמה: ניב רסקין" value="">
         </div>
 
         <!-- Input Form -->
@@ -771,17 +775,29 @@
     const GEMINI_API_KEY = 'AIzaSyB0WsuUPC4WodZZvkvfRlCtz_GnAWtadjY';
     const GEMINI_MODEL = 'gemini-2.5-pro';
 
-    // Channel name persistence
+    // Settings persistence
     const PRODUCER_KEY = 'npos_producer';
+    const SHOW_KEY = 'npos_show';
+    const HOST_KEY = 'npos_host';
     const channelInput = document.getElementById('channel-name');
     const producerInput = document.getElementById('producer-name');
+    const showInput = document.getElementById('show-name');
+    const hostInput = document.getElementById('host-name');
     channelInput.value = localStorage.getItem(CHANNEL_KEY) || '';
     producerInput.value = localStorage.getItem(PRODUCER_KEY) || '';
+    showInput.value = localStorage.getItem(SHOW_KEY) || '';
+    hostInput.value = localStorage.getItem(HOST_KEY) || '';
     channelInput.addEventListener('input', function() {
         localStorage.setItem(CHANNEL_KEY, this.value.trim());
     });
     producerInput.addEventListener('input', function() {
         localStorage.setItem(PRODUCER_KEY, this.value.trim());
+    });
+    showInput.addEventListener('input', function() {
+        localStorage.setItem(SHOW_KEY, this.value.trim());
+    });
+    hostInput.addEventListener('input', function() {
+        localStorage.setItem(HOST_KEY, this.value.trim());
     });
 
     function getChannel() {
@@ -792,15 +808,29 @@
         return producerInput.value.trim() || '';
     }
 
+    function getShow() {
+        return showInput.value.trim() || '';
+    }
+
+    function getHost() {
+        return hostInput.value.trim() || '';
+    }
+
     // ===== GEMINI API =====
     function buildSystemPrompt(data, analysis) {
         const ch = getChannel();
         const fn = firstName(data.name);
         const producer = getProducer();
+        const show = getShow();
+        const host = getHost();
         const producerIntro = producer ? `שמך: ${producer}. חתום בשמך הפרטי בסוף ההודעה הראשונה.` : 'אל תחתום בשם.';
+        const showInfo = show ? `שם התוכנית: ${show}` : '';
+        const hostInfo = host ? `שם המגיש/ה: ${host}` : '';
 
-        return `אתה מפיק/תחקירן בכיר בדסק חדשות של *${ch}*. אתה אדם אמיתי שכותב הודעת WhatsApp -- לא בוט, לא AI.
+        return `אתה מפיק/תחקירן בדסק חדשות של *${ch}*. אתה אדם אמיתי שכותב הודעת WhatsApp -- לא בוט, לא AI.
 ${producerIntro}
+${showInfo}
+${hostInfo}
 
 === פרטי המשימה ===
 מרואיין: ${data.name} (${data.role})
@@ -817,37 +847,40 @@ ${analysis.dressCode ? 'לבוש: ' + analysis.dressCode : ''}
 ${analysis.techTip ? 'טכני: ' + analysis.techTip : ''}
 ${analysis.locNote ? 'מיקום: ' + analysis.locNote : ''}
 
-=== כללי ניסוח מחייבים ===
+=== סגנון ותו ===
 1. פנה אליו בשם *${fn}* בלבד (לא בשם מלא, לא בתואר).
-2. עברית ישראלית תקשורתית -- כמו שמפיק חדשות ותיק באמת כותב בוואטסאפ. ישירה, חמה, מקצועית. לא רשמית מדי, לא סלנגית.
-3. טון: אתה מנהל את הסיטואציה. בטוח בעצמך, מכבד, שותף לדרך. לא מתחנן, לא מתנצל, לא "שירות לקוחות".
-4. אסור: אימוג'ים, סימנים מיוחדים, סוגריים מרובעים, placeholder-ים. רק טקסט נקי.
-5. השתמש ב-*כוכביות* רק לדגש מילה או שתיים חשובות (כמו בוואטסאפ). לא על כל משפט.
-6. הודעות קצרות ותכליתיות. 3-5 שורות מקסימום. כל מילה חייבת להרוויח את מקומה.
+2. עברית ישראלית תקשורתית -- כמו שמפיק חדשות באמת כותב בוואטסאפ. חמה, ידידותית, קולגיאלית. לא רשמית מדי.
+3. טון: אתה חבר/קולגה שמציע הזדמנות, לא בוס שדורש. חם, מכבד, נגיש. אתה מראה שאכפת לך מהמרואיין. לא מתחנן, אבל גם לא שתלטני.
+4. אימוג'ים: השתמש באימוג'ים בצורה טבעית ומדודה, כמו שכותבים בוואטסאפ אמיתי -- 🙏 בסיום, ✨ להדגשה, 📌 ללוגיסטיקה וכו'. 1-3 אימוג'ים להודעה, לא יותר.
+5. השתמש ב-*כוכביות* לדגש מילה או שתיים חשובות (כמו בוואטסאפ). לא על כל משפט.
+6. הודעות קצרות ותכליתיות. 4-6 שורות. כל מילה חייבת להרוויח את מקומה.
 7. אפס קצוות פתוחים: המרואיין לא צריך לשאול שום דבר, הכל ברור.
-8. לא לפתוח עם "שלום" או "שלום רב". פתח ב"היי ${fn}".
-9. לא להשתמש במילים: "אשמח", "נשמח", "נודה", "בבקשה". אלה מילים חלשות. השתמש ב: "רוצה", "צריך", "סוגר", "מסדר".
+8. לא לפתוח עם "שלום" או "שלום רב". פתח ב"היי ${fn}" או "${fn} היי".
+9. ${show ? 'ציין את שם התוכנית *' + show + '*' + (host ? ' עם ' + host : '') + ' באופן טבעי בהודעה.' : ''}
+10. הבטח תזכורת -- "כמובן שאדבר איתך לפני לתזכורת" או "אני כאן לכל שאלה". זה בונה ביטחון.
+11. גמישות בשעה: השתמש ב"בסביבות השעה X" או "סביב X" -- לא לנעול למינוטה מדויקת.
+12. אסור: סוגריים מרובעים, placeholder-ים. רק טקסט נקי מוכן להעתקה.
 
 === מנגנון חשיבה (לא להציג!) ===
 לפני כל תשובה, עבור 4 שלבים פנימיים:
 - פסיכולוגי: מה המרואיין מרגיש? פחד? אגו? חוסר ביטחון? עומס? התאם את הטון.
 - קריאייטיב: נסח את ההודעה הכי חדה ומשכנעת. ללא מילים מיותרות.
 - אופרציה: כל המידע הלוגיסטי -- שעות, מיקום, פורמט -- מדויק וברור.
-- CRM: שמור על חום כדי שהמרואיין יישאר מקור טוב לעתיד.
+- CRM: שמור על חום וקשר אישי כדי שהמרואיין יישאר מקור טוב לעתיד.
 
 === תגובות לפי מצב ===
 *אישור:* שלח בריף מקצועי ומלא:
-- פתיחה חמה (שורה אחת)
+- פתיחה חמה וידידותית (שורה אחת, עם אימוג'י)
 - *נושא:* משפט אחד ממוקד
 - *3 נקודות מפתח:* מותאמות אישית לנושא "${data.topic}" ולתחום "${data.role}" -- לא גנריות!
-- *לוגיסטיקה:* שעה, פורמט, מיקום
+- *לוגיסטיקה:* שעה (בסביבות), פורמט, מיקום
 - לבוש וטיפ טכני (אם רלוונטי)
-- סגירה בטוחה
+- הבטחת תזכורת + סגירה חמה עם אימוג'י 🙏
 
-*היסוס:* אסטרטגיית ריכוך מותאמת לפרופיל. תן שליטה, הפחת סיכון, בנה ביטחון.
-*סירוב:* סגור בכבוד. דלת פתוחה. קצר ומכובד.
-*שינוי שעה:* גמישות + חלופה קונקרטית.
-*בקשת מידע:* תשובה ממוקדת, סגור שוב בביטחון.
+*היסוס:* ריכוך חם ואישי. הראה הבנה, תן שליטה, הפחת סיכון. "אני מבין לגמרי", "תרגיש בנוח". תציע גמישות.
+*סירוב:* סגור בכבוד וחום. "מכבד לגמרי". דלת פתוחה. קצר ומכובד.
+*שינוי שעה:* גמישות מלאה + חלופה קונקרטית. "בוא ננסה להתאים".
+*בקשת מידע:* תשובה ממוקדת, סגור שוב בחום ובביטחון.
 
 === פורמט פלט ===
 החזר *רק* את טקסט ההודעה. בלי הסברים, בלי "הנה ההודעה:", בלי כותרות, בלי מרכאות מקיפות. רק הטקסט שאני מעתיק ישר לוואטסאפ.`;
@@ -1450,15 +1483,21 @@ ${analysis.locNote ? 'מיקום: ' + analysis.locNote : ''}
 
         // AI-generated pitch
         const producer = getProducer();
+        const show = getShow();
+        const host = getHost();
+        const showLine = show ? `\nשם התוכנית: *${show}*${host ? ' עם ' + host : ''}. ציין את שם התוכנית והמגיש באופן טבעי.` : '';
         const pitchPrompt = `כתוב הודעת פתיחה ראשונה למרואיין ${data.name}.
-זו פנייה ראשונה בוואטסאפ. מבנה:
+זו פנייה ראשונה בוואטסאפ. כתוב כמו מפיק אמיתי שפונה בוואטסאפ -- חם, ידידותי, קולגיאלי.${showLine}
+
+מבנה:
 1. "היי ${firstName(data.name)}" + הצגה קצרה שלך מהדסק${producer ? ' (שמך ' + producer + ')' : ''}
 2. למה פנית דווקא אליו -- סיבה אישית ומחמיאה שקשורה לתחום שלו (${data.role})
 3. הנושא: ${data.topic}${data.context ? ' (זווית: ' + data.context + ')' : ''}
-4. הצעת סגירה: שעה ${fmtTime(data.time)}, ראיון ${typeLabel[data.type]}
-5. שורת סגירה בטוחה -- "תגיד לי אם זה מתאים ואני מסדר הכל"
+4. הצעת סגירה: *בסביבות* ${fmtTime(data.time)}, ראיון ${typeLabel[data.type]}
+5. הבטחת תזכורת -- "כמובן שאדבר איתך לפני לתזכורת"
+6. סגירה חמה עם אימוג'י -- "מחכה לתשובתך 🙏"
 
-הודעה אחת, 4-5 שורות מקסימום, שגורמת לו לרצות להגיד כן.`;
+הודעה אחת, 4-6 שורות, חמה ואישית, שגורמת לו לרצות להגיד כן. השתמש ב-1-2 אימוג'ים בצורה טבעית.`;
 
         const pitchMsg = await callAI(pitchPrompt);
         removeLoading();
