@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Producer OS v3.0</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #101318;
+            --bg2: #181c24;
+            --bg3: #1f2430;
+            --bg4: #272d3a;
+            --accent: #4f8cff;
+            --accent2: #6ba0ff;
+            --accent-dim: rgba(79,140,255,0.13);
+            --green: #25d366;
+            --green-dim: rgba(37,211,102,0.12);
+            --red: #f87171;
+            --red-dim: rgba(248,113,113,0.12);
+            --yellow: #fbbf24;
+            --text: #e4e7ed;
+            --text2: #97a0b3;
+            --text3: #5f6880;
+            --border: #2a3040;
+            --r: 10px;
+            --font: -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif;
+            --wa-bg: #0b141a;
+            --wa-out: #005c4b;
+            --wa-in: #202c33;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            direction: rtl;
+            line-height: 1.6;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 17px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo .dot {
+            width: 7px; height: 7px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+        .logo span { font-size: 11px; color: var(--text3); font-weight: 400; }
+
+        nav { display: flex; gap: 4px; }
+
+        nav button {
+            background: transparent;
+            border: none;
+            color: var(--text2);
+            padding: 7px 16px;
+            font-size: 13px;
+            font-family: var(--font);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        nav button:hover { background: var(--bg4); color: var(--text); }
+        nav button.active { background: var(--accent-dim); color: var(--accent); font-weight: 600; }
+
+        /* ===== LAYOUT ===== */
+        main { max-width: 760px; margin: 0 auto; padding: 20px 16px 100px; }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* ===== SETTINGS BAR ===== */
+        .settings-bar {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .settings-bar label {
+            font-size: 13px;
+            color: var(--text2);
+            white-space: nowrap;
+        }
+
+        .settings-bar input {
+            flex: 1;
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 7px 12px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: var(--font);
+            direction: rtl;
+        }
+
+        .settings-bar input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px;
+            margin-bottom: 16px;
+            animation: fadeUp .25s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card h2 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        /* ===== FORM ===== */
+        .fg { margin-bottom: 14px; }
+
+        .fg label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text2);
+            margin-bottom: 5px;
+        }
+
+        .fg label .req { color: var(--red); }
+
+        .fg input, .fg select, .fg textarea {
+            width: 100%;
+            padding: 9px 12px;
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: var(--font);
+            direction: rtl;
+            transition: border-color .15s;
+        }
+
+        .fg input:focus, .fg select:focus, .fg textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .fg textarea { resize: vertical; min-height: 60px; }
+
+        .fg select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%2397a0b3' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: 12px center;
+        }
+
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: all .15s;
+            margin-top: 6px;
+        }
+
+        .btn:hover { background: var(--accent2); }
+        .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+            width: auto;
+            margin-top: 0;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text2);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg4);
+            color: var(--text);
+        }
+
+        /* ===== CONVERSATION AREA ===== */
+        #convo {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* ===== STEP LABEL ===== */
+        .step-label {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text3);
+            padding: 6px 0;
+        }
+
+        /* ===== WHATSAPP BUBBLE ===== */
+        .wa-wrap {
+            background: var(--wa-bg);
+            border-radius: var(--r);
+            padding: 14px;
+        }
+
+        .bubble {
+            border-radius: 8px;
+            padding: 10px 14px;
+            max-width: 92%;
+            font-size: 14px;
+            line-height: 1.75;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .bubble-out {
+            background: var(--wa-out);
+            border-radius: 8px 0 8px 8px;
+            margin-right: auto;
+        }
+
+        .bubble-in {
+            background: var(--wa-in);
+            border-radius: 0 8px 8px 8px;
+            margin-left: auto;
+        }
+
+        .bubble .ts {
+            display: block;
+            text-align: left;
+            font-size: 10px;
+            color: rgba(255,255,255,.4);
+            margin-top: 3px;
+        }
+
+        .bubble-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .copy-btn {
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            padding: 5px 12px;
+            font-size: 12px;
+            font-family: var(--font);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+        /* ===== RESPONSE INPUT ===== */
+        .response-box {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 16px;
+        }
+
+        .response-box h3 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text2);
+        }
+
+        .response-box textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: var(--font);
+            direction: rtl;
+            resize: vertical;
+            min-height: 55px;
+        }
+
+        .response-box textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .response-box .btn {
+            margin-top: 10px;
+        }
+
+        /* ===== QUICK ACTIONS ===== */
+        .quick-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .qa-btn {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            padding: 6px 14px;
+            font-size: 12px;
+            font-family: var(--font);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .qa-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ===== PROTOCOL DRAWER ===== */
+        .protocol-section {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+        }
+
+        .protocol-section summary {
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text2);
+            list-style: none;
+        }
+
+        .protocol-section summary::-webkit-details-marker { display: none; }
+
+        .protocol-section .inner {
+            padding: 0 16px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .proto-item {
+            background: var(--bg3);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .proto-item-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .proto-item-body { padding: 10px 14px; }
+
+        /* ===== NEW INTERVIEWEE BTN ===== */
+        .new-session-btn {
+            display: block;
+            margin: 20px auto 0;
+            background: transparent;
+            border: 1px dashed var(--border);
+            color: var(--text3);
+            padding: 10px 24px;
+            font-size: 13px;
+            font-family: var(--font);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .new-session-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ===== CRM ===== */
+        .crm-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .crm-bar h2 { font-size: 18px; }
+
+        .crm-bar .actions { display: flex; gap: 6px; }
+
+        .crm-search input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: var(--font);
+            direction: rtl;
+            margin-bottom: 14px;
+        }
+
+        .crm-search input:focus { outline: none; border-color: var(--accent); }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stat {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 14px;
+            text-align: center;
+        }
+
+        .stat .num { font-size: 26px; font-weight: 700; color: var(--accent); }
+        .stat .lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+        .crm-table-wrap {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        th {
+            background: var(--bg3);
+            padding: 10px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text3);
+            text-align: right;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        td {
+            padding: 12px 14px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg4); }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-ok { background: var(--green-dim); color: var(--green); }
+        .badge-wait { background: rgba(251,191,36,.12); color: var(--yellow); }
+        .badge-no { background: var(--red-dim); color: var(--red); }
+
+        .crm-empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text3);
+            font-size: 14px;
+        }
+
+        .row-actions { display: flex; gap: 4px; }
+
+        .icon-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text3);
+            width: 28px; height: 28px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            transition: all .15s;
+        }
+
+        .icon-btn:hover { background: var(--bg4); color: var(--text); }
+        .icon-btn.del:hover { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+
+        /* ===== MODAL ===== */
+        .overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.55);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 200;
+            opacity: 0; pointer-events: none;
+            transition: opacity .15s;
+        }
+
+        .overlay.on { opacity: 1; pointer-events: all; }
+
+        .modal {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px;
+            max-width: 420px; width: 90%;
+        }
+
+        .modal h3 { font-size: 15px; margin-bottom: 8px; }
+        .modal p { font-size: 13px; color: var(--text2); margin-bottom: 16px; }
+        .modal .btns { display: flex; gap: 8px; }
+
+        /* ===== TOAST ===== */
+        .toast-box {
+            position: fixed; bottom: 20px; left: 20px;
+            z-index: 300;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+
+        .toast {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 16px;
+            font-size: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.3);
+            animation: tIn .2s ease, tOut .2s ease 2.5s forwards;
+        }
+
+        .toast.ok { border-right: 3px solid var(--green); }
+        .toast.err { border-right: 3px solid var(--red); }
+
+        @keyframes tIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes tOut { from{opacity:1} to{opacity:0} }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        @media (max-width: 600px) {
+            main { padding: 14px 10px 80px; }
+            .row2 { grid-template-columns: 1fr; }
+        }
+
+        .hidden { display: none !important; }
+
+        .loading-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            color: var(--text2);
+            font-size: 13px;
+        }
+
+        .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .6s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <span class="dot"></span>
+        News Producer OS
+        <span>v3.0</span>
+    </div>
+    <nav id="nav">
+        <button class="active" data-v="producer">מפיק</button>
+        <button data-v="crm">CRM</button>
+    </nav>
+</header>
+
+<main>
+    <!-- ===== PRODUCER VIEW ===== -->
+    <section id="v-producer" class="view active">
+
+        <!-- Settings -->
+        <div class="settings-bar">
+            <label>שם הערוץ:</label>
+            <input type="text" id="channel-name" placeholder="לדוגמה: חדשות 12" value="">
+            <label>שם התחקירנ/ית:</label>
+            <input type="text" id="producer-name" placeholder="לדוגמה: נועה כהן" value="">
+        </div>
+
+        <!-- Input Form -->
+        <div class="card" id="form-card">
+            <h2>פרטי מרואיין חדש</h2>
+            <form id="the-form" autocomplete="off">
+                <div class="fg">
+                    <label>שם מלא <span class="req">*</span></label>
+                    <input type="text" id="f-name" placeholder='ד"ר ישראל ישראלי' required>
+                </div>
+                <div class="fg">
+                    <label>תפקיד / מומחיות <span class="req">*</span></label>
+                    <input type="text" id="f-role" placeholder="ראש החוג לכלכלה, אוניברסיטת תל אביב" required>
+                </div>
+                <div class="fg">
+                    <label>נושא הראיון <span class="req">*</span></label>
+                    <input type="text" id="f-topic" placeholder="עליית מחירי הדיור ברבעון האחרון" required>
+                </div>
+                <div class="fg">
+                    <label>הקשר / זווית</label>
+                    <textarea id="f-context" placeholder="למה דווקא הוא? מה הזווית שלנו?"></textarea>
+                </div>
+                <div class="row2">
+                    <div class="fg">
+                        <label>שעת שידור <span class="req">*</span></label>
+                        <input type="time" id="f-time" required>
+                    </div>
+                    <div class="fg">
+                        <label>סוג ראיון <span class="req">*</span></label>
+                        <select id="f-type" required>
+                            <option value="">בחר...</option>
+                            <option value="studio">סטודיו</option>
+                            <option value="zoom">זום / וידאו</option>
+                            <option value="phone">טלפוני</option>
+                            <option value="field">שטח</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="fg" id="loc-group">
+                    <label>מיקום / לינק</label>
+                    <input type="text" id="f-location" placeholder="כתובת או לינק זום">
+                </div>
+                <div class="fg">
+                    <label>חסמים ידועים</label>
+                    <textarea id="f-barriers" placeholder='סירב בעבר, חושש מחשיפה, לו"ז צפוף...'></textarea>
+                </div>
+                <div class="fg">
+                    <label>טלפון</label>
+                    <input type="tel" id="f-phone" placeholder="050-0000000" dir="ltr">
+                </div>
+                <button type="submit" class="btn">צור הודעת פתיחה</button>
+            </form>
+        </div>
+
+        <!-- Conversation Area -->
+        <div id="convo"></div>
+
+    </section>
+
+    <!-- ===== CRM VIEW ===== -->
+    <section id="v-crm" class="view">
+        <div class="crm-bar">
+            <h2>מאגר מרואיינים</h2>
+            <div class="actions">
+                <button class="btn btn-small btn-outline" id="btn-csv">ייצוא CSV</button>
+                <button class="btn btn-small" style="background:var(--red)" id="btn-clear">מחק הכל</button>
+            </div>
+        </div>
+        <div class="stats-row" id="crm-stats"></div>
+        <div class="crm-search">
+            <input type="text" id="crm-q" placeholder="חיפוש לפי שם, נושא, תפקיד...">
+        </div>
+        <div class="crm-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>תאריך</th>
+                        <th>שם</th>
+                        <th>תפקיד</th>
+                        <th>נושא</th>
+                        <th>סוג</th>
+                        <th>סטטוס</th>
+                        <th>פעולות</th>
+                    </tr>
+                </thead>
+                <tbody id="crm-body"></tbody>
+            </table>
+            <div class="crm-empty" id="crm-empty">עדיין אין מרואיינים במאגר</div>
+        </div>
+    </section>
+</main>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+    <div class="modal">
+        <h3 id="m-title"></h3>
+        <p id="m-text"></p>
+        <div class="btns">
+            <button class="btn btn-small" id="m-ok">אישור</button>
+            <button class="btn btn-small btn-outline" id="m-no">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-box" id="toasts"></div>
+
+<script>
+(function() {
+    'use strict';
+
+    // ===== STORAGE =====
+    const CRM_KEY = 'npos_crm';
+    const CHANNEL_KEY = 'npos_channel';
+
+    function loadCRM() { try { return JSON.parse(localStorage.getItem(CRM_KEY)) || []; } catch { return []; } }
+    function saveCRM(d) { localStorage.setItem(CRM_KEY, JSON.stringify(d)); }
+
+    // ===== GEMINI API CONFIG =====
+    const GEMINI_API_KEY = 'AIzaSyAGYOQvDHU6Ps1tf2IDFc3wE9joGkLM2Is';
+    const GEMINI_MODEL = 'gemini-2.5-pro';
+
+    // Channel name persistence
+    const PRODUCER_KEY = 'npos_producer';
+    const channelInput = document.getElementById('channel-name');
+    const producerInput = document.getElementById('producer-name');
+    channelInput.value = localStorage.getItem(CHANNEL_KEY) || '';
+    producerInput.value = localStorage.getItem(PRODUCER_KEY) || '';
+    channelInput.addEventListener('input', function() {
+        localStorage.setItem(CHANNEL_KEY, this.value.trim());
+    });
+    producerInput.addEventListener('input', function() {
+        localStorage.setItem(PRODUCER_KEY, this.value.trim());
+    });
+
+    function getChannel() {
+        return channelInput.value.trim() || 'הערוץ';
+    }
+
+    function getProducer() {
+        return producerInput.value.trim() || '';
+    }
+
+    // ===== GEMINI API =====
+    function buildSystemPrompt(data, analysis) {
+        const ch = getChannel();
+        const fn = firstName(data.name);
+        const producer = getProducer();
+        const producerIntro = producer ? `שמך: ${producer}. חתום בשמך הפרטי בסוף ההודעה הראשונה.` : 'אל תחתום בשם.';
+
+        return `אתה מפיק/תחקירן בכיר בדסק חדשות של *${ch}*. אתה אדם אמיתי שכותב הודעת WhatsApp -- לא בוט, לא AI.
+${producerIntro}
+
+=== פרטי המשימה ===
+מרואיין: ${data.name} (${data.role})
+נושא: ${data.topic}
+${data.context ? 'זווית/הקשר: ' + data.context : ''}
+פורמט: ${typeLabel[data.type] || data.type}
+שעה: ${fmtTime(data.time)}
+${data.location ? 'מיקום/לינק: ' + data.location : ''}
+${data.barriers ? 'חסמים ידועים: ' + data.barriers : ''}
+
+=== אינטליגנציה ===
+פרופיל: ${analysis.profile} | חסם: ${analysis.barrier} | אסטרטגיה: ${analysis.strategy}
+${analysis.dressCode ? 'לבוש: ' + analysis.dressCode : ''}
+${analysis.techTip ? 'טכני: ' + analysis.techTip : ''}
+${analysis.locNote ? 'מיקום: ' + analysis.locNote : ''}
+
+=== כללי ניסוח מחייבים ===
+1. פנה אליו בשם *${fn}* בלבד (לא בשם מלא, לא בתואר).
+2. עברית ישראלית תקשורתית -- כמו שמפיק חדשות ותיק באמת כותב בוואטסאפ. ישירה, חמה, מקצועית. לא רשמית מדי, לא סלנגית.
+3. טון: אתה מנהל את הסיטואציה. בטוח בעצמך, מכבד, שותף לדרך. לא מתחנן, לא מתנצל, לא "שירות לקוחות".
+4. אסור: אימוג'ים, סימנים מיוחדים, סוגריים מרובעים, placeholder-ים. רק טקסט נקי.
+5. השתמש ב-*כוכביות* רק לדגש מילה או שתיים חשובות (כמו בוואטסאפ). לא על כל משפט.
+6. הודעות קצרות ותכליתיות. 3-5 שורות מקסימום. כל מילה חייבת להרוויח את מקומה.
+7. אפס קצוות פתוחים: המרואיין לא צריך לשאול שום דבר, הכל ברור.
+8. לא לפתוח עם "שלום" או "שלום רב". פתח ב"היי ${fn}".
+9. לא להשתמש במילים: "אשמח", "נשמח", "נודה", "בבקשה". אלה מילים חלשות. השתמש ב: "רוצה", "צריך", "סוגר", "מסדר".
+
+=== מנגנון חשיבה (לא להציג!) ===
+לפני כל תשובה, עבור 4 שלבים פנימיים:
+- פסיכולוגי: מה המרואיין מרגיש? פחד? אגו? חוסר ביטחון? עומס? התאם את הטון.
+- קריאייטיב: נסח את ההודעה הכי חדה ומשכנעת. ללא מילים מיותרות.
+- אופרציה: כל המידע הלוגיסטי -- שעות, מיקום, פורמט -- מדויק וברור.
+- CRM: שמור על חום כדי שהמרואיין יישאר מקור טוב לעתיד.
+
+=== תגובות לפי מצב ===
+*אישור:* שלח בריף מקצועי ומלא:
+- פתיחה חמה (שורה אחת)
+- *נושא:* משפט אחד ממוקד
+- *3 נקודות מפתח:* מותאמות אישית לנושא "${data.topic}" ולתחום "${data.role}" -- לא גנריות!
+- *לוגיסטיקה:* שעה, פורמט, מיקום
+- לבוש וטיפ טכני (אם רלוונטי)
+- סגירה בטוחה
+
+*היסוס:* אסטרטגיית ריכוך מותאמת לפרופיל. תן שליטה, הפחת סיכון, בנה ביטחון.
+*סירוב:* סגור בכבוד. דלת פתוחה. קצר ומכובד.
+*שינוי שעה:* גמישות + חלופה קונקרטית.
+*בקשת מידע:* תשובה ממוקדת, סגור שוב בביטחון.
+
+=== פורמט פלט ===
+החזר *רק* את טקסט ההודעה. בלי הסברים, בלי "הנה ההודעה:", בלי כותרות, בלי מרכאות מקיפות. רק הטקסט שאני מעתיק ישר לוואטסאפ.`;
+    }
+
+    // Conversation history for GPT context
+    let conversationMessages = [];
+
+    async function callAI(userMessage, maxTokens) {
+        const sysPrompt = buildSystemPrompt(session.data, session.analysis);
+
+        // Build Gemini contents array from conversation history
+        const contents = [];
+
+        // Add conversation history
+        for (const msg of conversationMessages) {
+            contents.push({
+                role: msg.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: msg.content }]
+            });
+        }
+
+        // Add current user message
+        contents.push({
+            role: 'user',
+            parts: [{ text: userMessage }]
+        });
+
+        const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent?key=' + GEMINI_API_KEY;
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    system_instruction: { parts: [{ text: sysPrompt }] },
+                    contents: contents,
+                    generationConfig: {
+                        maxOutputTokens: maxTokens || 8192,
+                        temperature: 0.7
+                    }
+                })
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                toast('שגיאת API: ' + (err.error?.message || res.status), 'err');
+                return null;
+            }
+
+            const json = await res.json();
+            const reply = json.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            if (!reply) {
+                toast('לא התקבלה תשובה מה-API', 'err');
+                return null;
+            }
+
+            // Track conversation
+            conversationMessages.push({ role: 'user', content: userMessage });
+            conversationMessages.push({ role: 'assistant', content: reply });
+
+            return reply;
+        } catch (e) {
+            toast('שגיאת חיבור: ' + e.message, 'err');
+            return null;
+        }
+    }
+
+    async function callAIOneShot(prompt, maxTokens) {
+        const sysPrompt = buildSystemPrompt(session.data, session.analysis);
+        const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent?key=' + GEMINI_API_KEY;
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    system_instruction: { parts: [{ text: sysPrompt }] },
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        maxOutputTokens: maxTokens || 8192,
+                        temperature: 0.7
+                    }
+                })
+            });
+            if (!res.ok) return null;
+            const json = await res.json();
+            return json.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+        } catch (e) { return null; }
+    }
+
+    // ===== NAV =====
+    document.querySelectorAll('#nav button').forEach(b => {
+        b.addEventListener('click', () => {
+            document.querySelectorAll('#nav button').forEach(x => x.classList.remove('active'));
+            document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            document.getElementById('v-' + b.dataset.v).classList.add('active');
+            if (b.dataset.v === 'crm') renderCRM();
+        });
+    });
+
+    // ===== HELPERS =====
+    function toast(msg, type) {
+        const t = document.createElement('div');
+        t.className = 'toast ' + (type || 'ok');
+        t.textContent = msg;
+        document.getElementById('toasts').appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+
+    function modal(title, text) {
+        return new Promise(res => {
+            const o = document.getElementById('overlay');
+            document.getElementById('m-title').textContent = title;
+            document.getElementById('m-text').textContent = text;
+            o.classList.add('on');
+            function done(v) { o.classList.remove('on'); res(v); }
+            document.getElementById('m-ok').onclick = () => done(true);
+            document.getElementById('m-no').onclick = () => done(false);
+        });
+    }
+
+    function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function fmtTime(t) { if (!t) return ''; const p = t.split(':'); return p[0] + ':' + p[1]; }
+
+    function shiftTime(t, min) {
+        if (!t) return '';
+        const p = t.split(':').map(Number);
+        const d = new Date(2000, 0, 1, p[0], p[1] + min);
+        return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    }
+
+    function nowStamp() {
+        const n = new Date();
+        return String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+    }
+
+    function firstName(name) {
+        if (!name) return '';
+        const titles = ['ד"ר', 'ד״ר', "ד'ר", 'דר', 'פרופ', "פרופ'", 'מר', "גב'", 'גברת', 'עו"ד', 'עו״ד', 'רב', 'הרב', 'סגן', 'אלוף', 'תא"ל', 'רס"ן'];
+        const parts = name.trim().split(/\s+/);
+        for (const p of parts) {
+            const clean = p.replace(/[.,'״]/g, '');
+            if (titles.some(t => t.replace(/[.,'״]/g, '') === clean)) continue;
+            return p;
+        }
+        return parts[parts.length - 1];
+    }
+
+    function copyText(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+            btn.classList.add('copied');
+            btn.textContent = 'הועתק';
+            setTimeout(() => { btn.classList.remove('copied'); btn.textContent = 'העתק'; }, 1800);
+            toast('הועתק ללוח');
+        }).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;opacity:0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            btn.classList.add('copied');
+            btn.textContent = 'הועתק';
+            setTimeout(() => { btn.classList.remove('copied'); btn.textContent = 'העתק'; }, 1800);
+            toast('הועתק ללוח');
+        });
+    }
+
+    const typeLabel = { studio: 'סטודיו', zoom: 'זום', phone: 'טלפוני', field: 'שטח' };
+
+    // ===== SESSION STATE =====
+    let session = null; // { data, analysis, step, crmId }
+
+    // ===== ANALYSIS ENGINE (internal, not displayed) =====
+    function analyze(data) {
+        const barriers = (data.barriers || '').toLowerCase();
+        const role = (data.role || '').toLowerCase();
+        const nameLower = (data.name || '').toLowerCase();
+        let profile, barrier, strategy;
+
+        // Profile - check both name and role for titles
+        if (role.includes('פרופ') || role.includes('ד"ר') || role.includes('ד״ר') || role.includes('ראש') || role.includes('מנכ') ||
+            nameLower.includes('פרופ') || nameLower.includes('ד"ר') || nameLower.includes('ד״ר') || nameLower.includes("ד'ר")) {
+            profile = 'senior';
+        } else if (role.includes('עד') || barriers.includes('טראומ') || barriers.includes('פחד')) {
+            profile = 'witness';
+        } else if (role.includes('כנסת') || role.includes('שר ') || role.includes('פוליטי') || role.includes('ח"כ')) {
+            profile = 'political';
+        } else if (role.includes('הורה') || role.includes('תושב') || role.includes('אזרח')) {
+            profile = 'citizen';
+        } else {
+            profile = 'expert';
+        }
+
+        // Barrier
+        if (barriers.includes('סירב') || barriers.includes('לא רוצה') || barriers.includes('מסרב')) {
+            barrier = 'refusal';
+            strategy = 'rebuild_trust';
+        } else if (barriers.includes('עסוק') || barriers.includes('זמן') || barriers.includes('לו"ז') || barriers.includes('לוז')) {
+            barrier = 'time';
+            strategy = 'minimize_effort';
+        } else if (barriers.includes('חשיפה') || barriers.includes('פחד') || barriers.includes('חושש') || barriers.includes('מפחד')) {
+            barrier = 'fear';
+            strategy = 'safety';
+        } else if (barriers.includes('אגו') || barriers.includes('כבוד')) {
+            barrier = 'ego';
+            strategy = 'respect';
+        } else if (barriers) {
+            barrier = 'general';
+            strategy = 'direct';
+        } else {
+            barrier = 'none';
+            strategy = 'efficient';
+        }
+
+        // Tech details by type
+        let techTip, dressCode, locNote;
+        switch (data.type) {
+            case 'studio':
+                techTip = 'בהגעה לסטודיו, האיפור והתאורה עלינו.';
+                locNote = data.location || 'הכתובת תישלח בהמשך';
+                dressCode = 'חולצה בצבע אחיד, בלי פסים, בלי לבן בוהק, בלי כיתוב.';
+                break;
+            case 'zoom':
+                techTip = 'תאורה על הפנים, רקע נקי, אינטרנט יציב. עדיף מחשב מטלפון.';
+                locNote = data.location ? 'לינק: ' + data.location : 'הלינק יישלח בנפרד';
+                dressCode = 'חולצה בצבע אחיד, בלי פסים, בלי לבן.';
+                break;
+            case 'phone':
+                techTip = 'מקום שקט, עדיף אוזניות. אנחנו מתקשרים אליך.';
+                locNote = 'שיחה טלפונית';
+                dressCode = '';
+                break;
+            case 'field':
+                techTip = 'צוות צילום יגיע למיקום. עדיף צל מאשר שמש ישירה.';
+                locNote = data.location || 'המיקום יתואם';
+                dressCode = 'חולצה בצבע אחיד, בלי פסים, בלי לבן בוהק.';
+                break;
+            default:
+                techTip = ''; dressCode = ''; locNote = '';
+        }
+
+        return { profile, barrier, strategy, techTip, dressCode, locNote };
+    }
+
+    // ===== RESPONSE ANALYZER =====
+    function analyzeResponse(text) {
+        const t = text.toLowerCase().trim();
+
+        // Positive / accepting
+        if (/^(כן|בסדר|אוקיי|אוקי|ok|סבבה|מצוין|מתאים|יאללה|בוא|אין בעיה|לגמרי|בהחלט|נשמע טוב|יופי|אפשר|בטח|ברור)/i.test(t) ||
+            t.includes('מתאים לי') || t.includes('אני בעניין') || t.includes('בואו') || t.includes('סוגר') || t.includes('אני שם')) {
+            return 'yes';
+        }
+
+        // Time issue
+        if (t.includes('שעה') || t.includes('מוקדם') || t.includes('מאוחר') || t.includes('לא מתאים') && (t.includes('זמן') || t.includes('שעה')) ||
+            t.includes('אפשר להזיז') || t.includes('אפשר אחרי') || t.includes('אפשר לפני') || t.includes('עדיף') && t.includes('שעה')) {
+            return 'time';
+        }
+
+        // Needs info
+        if (t.includes('מה הנושא') || t.includes('על מה') || t.includes('מה מדויק') || t.includes('מה ישאלו') ||
+            t.includes('כמה זמן') || t.includes('מה צריך') || t.includes('איפה') || t.includes('איך זה עובד')) {
+            return 'info';
+        }
+
+        // Hesitant / barrier
+        if (t.includes('לא בטוח') || t.includes('לא יודע') || t.includes('מפחד') || t.includes('חושש') ||
+            t.includes('צריך לחשוב') || t.includes('אני לא') || t.includes('לא רוצה') || t.includes('אני מעדיף') && t.includes('לא') ||
+            t.includes('בוא נראה') || t.includes('לא נראה לי') || t.includes('קשה לי')) {
+            return 'hesitant';
+        }
+
+        // Flat refusal
+        if (/^(לא|לא תודה|לא מעוניין|לא רלוונטי|אני מסרב)/i.test(t)) {
+            return 'no';
+        }
+
+        // Default: treat as needs follow-up
+        return 'other';
+    }
+
+    // ===== MESSAGE GENERATORS (ALL AI-POWERED) =====
+    // All messages are now generated by Gemini AI.
+    // No fixed templates -- every response is contextual and unique.
+
+    // ===== UI: ADD BUBBLE =====
+    function addOutBubble(text) {
+        const convo = document.getElementById('convo');
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <div class="wa-wrap">
+                <div class="bubble bubble-out">${esc(text)}<span class="ts">${nowStamp()}</span></div>
+                <div class="bubble-actions">
+                    <button class="copy-btn">העתק</button>
+                </div>
+            </div>`;
+        convo.appendChild(div);
+        div.querySelector('.copy-btn').addEventListener('click', function() { copyText(text, this); });
+        div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+
+    function addInBubble(text) {
+        const convo = document.getElementById('convo');
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <div class="wa-wrap">
+                <div class="bubble bubble-in">${esc(text)}<span class="ts">${nowStamp()}</span></div>
+            </div>`;
+        convo.appendChild(div);
+    }
+
+    function addLabel(text) {
+        const convo = document.getElementById('convo');
+        const div = document.createElement('div');
+        div.className = 'step-label';
+        div.textContent = text;
+        convo.appendChild(div);
+    }
+
+    function addResponseInput() {
+        const convo = document.getElementById('convo');
+        const div = document.createElement('div');
+        div.className = 'response-box';
+        div.id = 'resp-box';
+        div.innerHTML = `
+            <h3>הדבק את התשובה של המרואיין:</h3>
+            <textarea id="resp-text" placeholder="העתק-הדבק את ההודעה שהוא שלח..."></textarea>
+            <div class="quick-actions">
+                <button class="qa-btn" data-t="yes">אישר</button>
+                <button class="qa-btn" data-t="time">בעיית שעה</button>
+                <button class="qa-btn" data-t="info">מבקש פרטים</button>
+                <button class="qa-btn" data-t="hesitant">מהסס</button>
+                <button class="qa-btn" data-t="no">מסרב</button>
+            </div>
+            <button class="btn" id="resp-btn">נתח והמשך</button>`;
+        convo.appendChild(div);
+
+        // Quick action buttons
+        div.querySelectorAll('.qa-btn').forEach(b => {
+            b.addEventListener('click', function() {
+                handleResponse(this.dataset.t, '');
+            });
+        });
+
+        div.querySelector('#resp-btn').addEventListener('click', function() {
+            const txt = document.getElementById('resp-text').value.trim();
+            if (!txt) { toast('הדבק את התשובה של המרואיין', 'err'); return; }
+            const type = analyzeResponse(txt);
+            handleResponse(type, txt);
+        });
+
+        div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+
+    async function addProtocolSection() {
+        const convo = document.getElementById('convo');
+        const data = session.data;
+        const fn = firstName(data.name);
+
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <details class="protocol-section">
+                <summary>הודעות מגירה -- זמן דינמי</summary>
+                <div class="inner proto-inner">
+                    <div class="loading-indicator"><div class="spinner"></div><span>מייצר הודעות מגירה...</span></div>
+                </div>
+            </details>`;
+        convo.appendChild(div);
+
+        const prompt = `צור 3 הודעות מגירה קצרות עבור ${fn}:
+
+1. הודעת עיכוב - דחיית הראיון ב-30 דקות (מ-${fmtTime(data.time)} ל-${shiftTime(data.time, 30)}) בגלל אירוע מתפרץ בשידור. הצג את זה בחיוב.
+2. הודעת הקדמה - הזדמנות להקדים ב-20 דקות (מ-${fmtTime(data.time)} ל-${shiftTime(data.time, -20)}). יותר זמן אנטנה.
+3. פולואו-אפ / תודה - הודעת תודה חמה אחרי הראיון. קצרה.
+
+החזר בדיוק 3 הודעות מופרדות ב-"---" (שלוש מקפים בשורה נפרדת). כל הודעה בנפרד, בלי כותרות, בלי מספור. רק הטקסט.`;
+
+        const aiReply = await callAIOneShot(prompt);
+        const inner = div.querySelector('.proto-inner');
+
+        if (aiReply) {
+            const parts = aiReply.split('---').map(p => p.trim()).filter(p => p);
+            const delayMsg = parts[0] || 'שגיאה ביצירת הודעה';
+            const rushMsg = parts[1] || 'שגיאה ביצירת הודעה';
+            const followMsg = parts[2] || 'שגיאה ביצירת הודעה';
+
+            inner.innerHTML = `
+                <div class="proto-item">
+                    <div class="proto-item-head"><span>הודעת עיכוב</span><button class="copy-btn" data-msg="delay">העתק</button></div>
+                    <div class="proto-item-body"><div class="wa-wrap"><div class="bubble bubble-out">${esc(delayMsg)}<span class="ts">${nowStamp()}</span></div></div></div>
+                </div>
+                <div class="proto-item">
+                    <div class="proto-item-head"><span>הודעת הקדמה</span><button class="copy-btn" data-msg="rush">העתק</button></div>
+                    <div class="proto-item-body"><div class="wa-wrap"><div class="bubble bubble-out">${esc(rushMsg)}<span class="ts">${nowStamp()}</span></div></div></div>
+                </div>
+                <div class="proto-item">
+                    <div class="proto-item-head"><span>פולואו-אפ / תודה</span><button class="copy-btn" data-msg="follow">העתק</button></div>
+                    <div class="proto-item-body"><div class="wa-wrap"><div class="bubble bubble-out">${esc(followMsg)}<span class="ts">${nowStamp()}</span></div></div></div>
+                </div>`;
+
+            const msgs = { delay: delayMsg, rush: rushMsg, follow: followMsg };
+            inner.querySelectorAll('.copy-btn').forEach(b => {
+                b.addEventListener('click', function() { copyText(msgs[this.dataset.msg], this); });
+            });
+        } else {
+            inner.innerHTML = '<p style="color:var(--red);text-align:center;padding:1rem">שגיאה ביצירת הודעות מגירה. נסה שוב.</p>';
+        }
+    }
+
+    function addNewSessionButton() {
+        const convo = document.getElementById('convo');
+        const btn = document.createElement('button');
+        btn.className = 'new-session-btn';
+        btn.textContent = '+ מרואיין חדש';
+        btn.addEventListener('click', resetSession);
+        convo.appendChild(btn);
+    }
+
+    // ===== LOADING INDICATOR =====
+    function addLoading() {
+        const convo = document.getElementById('convo');
+        const div = document.createElement('div');
+        div.id = 'loading-el';
+        div.className = 'loading-indicator';
+        div.innerHTML = '<div class="spinner"></div><span>המערכת מנתחת ומנסחת תשובה...</span>';
+        convo.appendChild(div);
+        div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+
+    function removeLoading() {
+        const el = document.getElementById('loading-el');
+        if (el) el.remove();
+    }
+
+    // ===== HANDLE RESPONSE =====
+    async function handleResponse(type, rawText) {
+        // Remove the response box
+        const box = document.getElementById('resp-box');
+        if (box) box.remove();
+
+        // Show their message if provided
+        if (rawText) {
+            addInBubble(rawText);
+        }
+
+        const data = session.data;
+        const fn = firstName(data.name);
+
+        // Build the prompt for GPT based on what happened
+        let prompt;
+        const labels = {
+            yes: 'המרואיין אישר',
+            time: 'בעיית שעה',
+            info: 'מבקש פרטים',
+            hesitant: 'מהסס',
+            no: 'מסרב',
+            other: 'ממשיך שיחה'
+        };
+
+        addLabel(labels[type] || 'ממשיך שיחה');
+        addLoading();
+
+        if (type === 'yes') {
+            prompt = `המרואיין ${fn} אישר! ${rawText ? 'הוא כתב: "' + rawText + '"' : ''}
+נסח בריף מקצועי מלא שכולל:
+- פתיחה חמה וקצרה
+- *נושא:* (משפט אחד)
+- *3 נקודות מפתח שכדאי לך להדגיש:* (מותאמות לנושא "${data.topic}" ולתחום של "${data.role}")
+- *לוגיסטיקה:* שעה, פורמט, מיקום
+- *לבוש:* (אם רלוונטי)
+- *טיפ טכני:*
+- סגירה קצרה`;
+        } else if (type === 'no') {
+            prompt = `המרואיין ${fn} מסרב. ${rawText ? 'הוא כתב: "' + rawText + '"' : ''}
+סגור בכבוד, השאר דלת פתוחה לעתיד. קצר.`;
+        } else if (type === 'time') {
+            prompt = `המרואיין ${fn} מבקש לשנות שעה. ${rawText ? 'הוא כתב: "' + rawText + '"' : 'לא ציין שעה ספציפית.'}
+הצע חלופה גמישה. השעה המקורית: ${fmtTime(data.time)}.`;
+        } else if (type === 'info') {
+            prompt = `המרואיין ${fn} מבקש מידע נוסף. ${rawText ? 'הוא כתב: "' + rawText + '"' : ''}
+תן תשובה ממוקדת וסגור שוב. אל תשכח לשאול אם מתאים לו.`;
+        } else if (type === 'hesitant') {
+            prompt = `המרואיין ${fn} מהסס. ${rawText ? 'הוא כתב: "' + rawText + '"' : ''}
+הפעל אסטרטגיית ריכוך מותאמת. תן לו להרגיש בטוח ושהוא בשליטה.`;
+        } else {
+            prompt = `המרואיין ${fn} ענה: "${rawText || '(תגובה לא ברורה)'}"
+נתח את מה שהוא אומר ונסח תשובה מתאימה. נסה לקדם לכיוון סגירה.`;
+        }
+
+        const aiReply = await callAI(prompt);
+        removeLoading();
+
+        if (!aiReply) {
+            // Minimal generic fallback when AI fails
+            const fallbacks = {
+                yes: fn + ', מעולה! שמח שסגרנו. שולח לך עוד רגע את כל הפרטים.',
+                no: fn + ', מכבד לגמרי. תודה על ההקשבה ויום טוב.',
+                time: fn + ', בלי בעיה. איזו שעה נוחה לך? אני מסדר.',
+                info: fn + ', בטח. שאל מה שצריך ואני כאן.',
+                hesitant: fn + ', מבין לגמרי. בוא נדבר על זה -- אני כאן לכל שאלה.'
+            };
+            addOutBubble(fallbacks[type] || fn + ', קיבלתי. חוזר אליך מיד.');
+            toast('שגיאת AI -- נשלחה תשובה כללית', 'err');
+            if (type === 'yes') {
+                updateCRMStatus(session.crmId, 'completed');
+                await addProtocolSection();
+                addNewSessionButton();
+                session.step = 'done';
+                return;
+            }
+            if (type === 'no') {
+                updateCRMStatus(session.crmId, 'cancelled');
+                addNewSessionButton();
+                session.step = 'done';
+                return;
+            }
+            session.step = 'follow_up';
+            addResponseInput();
+            return;
+        }
+
+        addOutBubble(aiReply);
+
+        if (type === 'yes') {
+            updateCRMStatus(session.crmId, 'completed');
+            await addProtocolSection();
+            addNewSessionButton();
+            session.step = 'done';
+        } else if (type === 'no') {
+            updateCRMStatus(session.crmId, 'cancelled');
+            addNewSessionButton();
+            session.step = 'done';
+        } else {
+            session.step = 'follow_up';
+            addResponseInput();
+        }
+    }
+
+    // ===== FORM SUBMIT =====
+    document.getElementById('the-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const data = {
+            name: document.getElementById('f-name').value.trim(),
+            role: document.getElementById('f-role').value.trim(),
+            topic: document.getElementById('f-topic').value.trim(),
+            context: document.getElementById('f-context').value.trim(),
+            time: document.getElementById('f-time').value,
+            type: document.getElementById('f-type').value,
+            location: document.getElementById('f-location').value.trim(),
+            barriers: document.getElementById('f-barriers').value.trim(),
+            phone: document.getElementById('f-phone').value.trim()
+        };
+
+        if (!data.name || !data.role || !data.topic || !data.time || !data.type) {
+            toast('נא למלא את כל השדות המסומנים *', 'err');
+            return;
+        }
+
+        if (!channelInput.value.trim()) {
+            channelInput.focus();
+            channelInput.style.borderColor = 'var(--red)';
+            setTimeout(() => channelInput.style.borderColor = '', 2000);
+            toast('נא להזין שם ערוץ למעלה', 'err');
+            return;
+        }
+
+        const a = analyze(data);
+
+        // Save to CRM
+        const crm = loadCRM();
+        const id = Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+        crm.unshift({
+            id, date: new Date().toISOString(),
+            name: data.name, role: data.role, topic: data.topic,
+            type: data.type, phone: data.phone, status: 'pending',
+            context: data.context, barriers: data.barriers
+        });
+        saveCRM(crm);
+
+        session = { data, analysis: a, step: 'pitch', crmId: id };
+
+        // Reset conversation history
+        conversationMessages = [];
+
+        // Collapse form
+        document.getElementById('form-card').classList.add('hidden');
+
+        // Clear convo and build
+        const convo = document.getElementById('convo');
+        convo.innerHTML = '';
+
+        addLabel('הודעת פתיחה ל' + data.name);
+        addLoading();
+
+        // AI-generated pitch
+        const producer = getProducer();
+        const pitchPrompt = `כתוב הודעת פתיחה ראשונה למרואיין ${data.name}.
+זו פנייה ראשונה בוואטסאפ. מבנה:
+1. "היי ${firstName(data.name)}" + הצגה קצרה שלך מהדסק${producer ? ' (שמך ' + producer + ')' : ''}
+2. למה פנית דווקא אליו -- סיבה אישית ומחמיאה שקשורה לתחום שלו (${data.role})
+3. הנושא: ${data.topic}${data.context ? ' (זווית: ' + data.context + ')' : ''}
+4. הצעת סגירה: שעה ${fmtTime(data.time)}, ראיון ${typeLabel[data.type]}
+5. שורת סגירה בטוחה -- "תגיד לי אם זה מתאים ואני מסדר הכל"
+
+הודעה אחת, 4-5 שורות מקסימום, שגורמת לו לרצות להגיד כן.`;
+
+        const pitchMsg = await callAI(pitchPrompt);
+        removeLoading();
+
+        if (pitchMsg) {
+            addOutBubble(pitchMsg);
+        } else {
+            // Minimal emergency fallback
+            const fn = firstName(data.name);
+            const ch = getChannel();
+            const fallback = 'היי ' + fn + ', פונה אליך מהדסק של ' + ch + '.\nאנחנו עובדים על *' + data.topic + '* ורצינו לשמוע אותך.\nמה דעתך על ראיון ' + typeLabel[data.type] + ' ב-' + fmtTime(data.time) + '?';
+            addOutBubble(fallback);
+            conversationMessages.push({ role: 'user', content: pitchPrompt });
+            conversationMessages.push({ role: 'assistant', content: fallback });
+            toast('שגיאת AI -- נשלחה הודעה כללית', 'err');
+        }
+
+        addResponseInput();
+        toast('הודעת הפתיחה נוצרה');
+    });
+
+    // ===== DYNAMIC LOCATION LABEL =====
+    document.getElementById('f-type').addEventListener('change', function() {
+        const lbl = document.querySelector('#loc-group label');
+        const inp = document.getElementById('f-location');
+        switch (this.value) {
+            case 'studio': lbl.textContent = 'כתובת הסטודיו'; inp.placeholder = 'רח\' הצפירה 5, ת"א'; break;
+            case 'zoom': lbl.textContent = 'לינק זום'; inp.placeholder = 'https://zoom.us/j/...'; break;
+            case 'phone': lbl.textContent = 'מספר (אם שונה)'; inp.placeholder = 'אם שונה מהטלפון למעלה'; break;
+            case 'field': lbl.textContent = 'מיקום צילום'; inp.placeholder = 'כתובת מדויקת'; break;
+            default: lbl.textContent = 'מיקום / לינק'; inp.placeholder = 'כתובת או לינק';
+        }
+    });
+
+    // ===== RESET SESSION =====
+    function resetSession() {
+        session = null;
+        conversationMessages = [];
+        document.getElementById('convo').innerHTML = '';
+        document.getElementById('form-card').classList.remove('hidden');
+        document.getElementById('the-form').reset();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ===== CRM HELPERS =====
+    function updateCRMStatus(id, status) {
+        const crm = loadCRM();
+        const r = crm.find(x => x.id === id);
+        if (r) { r.status = status; saveCRM(crm); }
+    }
+
+    // ===== CRM RENDER =====
+    function renderCRM(filter) {
+        let data = loadCRM();
+        const all = data;
+
+        if (filter) {
+            const q = filter.toLowerCase();
+            data = data.filter(r =>
+                r.name.toLowerCase().includes(q) ||
+                r.role.toLowerCase().includes(q) ||
+                r.topic.toLowerCase().includes(q) ||
+                (r.phone && r.phone.includes(q))
+            );
+        }
+
+        // Stats
+        document.getElementById('crm-stats').innerHTML = `
+            <div class="stat"><div class="num">${all.length}</div><div class="lbl">סה"כ</div></div>
+            <div class="stat"><div class="num" style="color:var(--green)">${all.filter(r=>r.status==='completed').length}</div><div class="lbl">הושלמו</div></div>
+            <div class="stat"><div class="num" style="color:var(--yellow)">${all.filter(r=>r.status==='pending').length}</div><div class="lbl">ממתינים</div></div>
+            <div class="stat"><div class="num" style="color:var(--red)">${all.filter(r=>r.status==='cancelled').length}</div><div class="lbl">בוטלו</div></div>`;
+
+        const tbody = document.getElementById('crm-body');
+        const empty = document.getElementById('crm-empty');
+
+        if (data.length === 0) {
+            tbody.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+
+        const sLabels = { completed: 'הושלם', pending: 'ממתין', cancelled: 'בוטל' };
+        const sClass = { completed: 'badge-ok', pending: 'badge-wait', cancelled: 'badge-no' };
+
+        tbody.innerHTML = data.map(r => {
+            const d = new Date(r.date);
+            const ds = d.toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit', year:'2-digit' });
+            return `<tr>
+                <td>${ds}</td>
+                <td><strong>${esc(r.name)}</strong>${r.phone ? '<br><span style="font-size:11px;color:var(--text3)">' + esc(r.phone) + '</span>' : ''}</td>
+                <td>${esc(r.role)}</td>
+                <td>${esc(r.topic)}</td>
+                <td>${typeLabel[r.type] || r.type}</td>
+                <td><span class="badge ${sClass[r.status] || ''}">${sLabels[r.status] || r.status}</span></td>
+                <td><div class="row-actions">
+                    <button class="icon-btn" title="הושלם" data-a="ok" data-id="${r.id}">V</button>
+                    <button class="icon-btn del" title="מחק" data-a="del" data-id="${r.id}">X</button>
+                </div></td>
+            </tr>`;
+        }).join('');
+
+        tbody.querySelectorAll('.icon-btn').forEach(b => {
+            b.addEventListener('click', function() {
+                const id = this.dataset.id;
+                if (this.dataset.a === 'ok') {
+                    updateCRMStatus(id, 'completed');
+                    toast('עודכן להושלם');
+                } else {
+                    const crm = loadCRM();
+                    saveCRM(crm.filter(r => r.id !== id));
+                    toast('נמחק');
+                }
+                renderCRM(document.getElementById('crm-q').value);
+            });
+        });
+    }
+
+    document.getElementById('crm-q').addEventListener('input', function() { renderCRM(this.value); });
+
+    document.getElementById('btn-csv').addEventListener('click', function() {
+        const data = loadCRM();
+        if (!data.length) { toast('אין נתונים', 'err'); return; }
+        const BOM = '\uFEFF';
+        const h = ['תאריך','שם','תפקיד','נושא','סוג','טלפון','סטטוס'].join(',');
+        const sL = { completed:'הושלם', pending:'ממתין', cancelled:'בוטל' };
+        const rows = data.map(r => {
+            const d = new Date(r.date).toLocaleDateString('he-IL');
+            return [d, r.name, r.role, r.topic, typeLabel[r.type]||r.type, r.phone||'', sL[r.status]||r.status]
+                .map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',');
+        });
+        const blob = new Blob([BOM + h + '\n' + rows.join('\n')], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'crm_' + new Date().toISOString().slice(0,10) + '.csv';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast('הקובץ יורד');
+    });
+
+    document.getElementById('btn-clear').addEventListener('click', async function() {
+        if (await modal('מחיקת הכל', 'למחוק את כל המרואיינים מהמאגר? אי אפשר לשחזר.')) {
+            saveCRM([]);
+            renderCRM();
+            toast('הנתונים נמחקו');
+        }
+    });
+
+    // Init
+    renderCRM();
+
+})();
+</script>
+</body>
+</html>
